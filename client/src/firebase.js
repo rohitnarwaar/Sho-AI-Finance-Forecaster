@@ -1,16 +1,20 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
+// ✅ Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBgZowLQxRQ-x8B0DvWngn20hjEd0DBnGU",
-  authDomain: "sho-finance-forecaster.firebaseapp.com",
-  projectId: "sho-finance-forecaster",
-  storageBucket: "sho-finance-forecaster.firebasestorage.app",
-  messagingSenderId: "855537220906",
-  appId: "1:855537220906:web:fd99b990a9beb7792b7253"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Firestore Database
 const db = getFirestore(app);
 
 export { db };
