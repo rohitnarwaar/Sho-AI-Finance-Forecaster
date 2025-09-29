@@ -4,6 +4,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar
 } from "recharts";
+import { db } from "../firebase";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 export default function Dashboard() {
   const [formData, setFormData] = useState({});
@@ -11,68 +13,95 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [forecastData, setForecastData] = useState([]);
   const [loanData, setLoanData] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const data = localStorage.getItem("lifeledgerFormData");
-    if (data) {
-      const parsed = JSON.parse(data);
-      setFormData(parsed);
+    const fetchLatestUserData = async () => {
+      try {
+        // 🔎 Get most recent user entry
+        const q = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(1));
+        const snapshot = await getDocs(q);
 
-      analyzeFinance(parsed).then((result) => {
-        setInsights(result);
+        if (!snapshot.empty) {
+          const userData = snapshot.docs[0].data();
+          setFormData(userData);
+
+          // 🔮 Analyze with Gemini
+          analyzeFinance(userData)
+            .then((result) => setInsights(result))
+            .catch(() => setError("Failed to analyze finance data."))
+            .finally(() => setLoading(false));
+
+          // 💰 Savings forecast
+          const income = parseFloat(userData.income || 0);
+          const expenses =
+            parseFloat(userData.food || 0) +
+            parseFloat(userData.rent || 0) +
+            parseFloat(userData.transport || 0) +
+            parseFloat(userData.utilities || 0) +
+            parseFloat(userData.misc || 0);
+
+          const savings = income - expenses;
+          if (savings > 0) {
+            fetch(`${import.meta.env.VITE_API_BASE}/forecast`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ monthlySaving: savings }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                const cleaned = data.map((d) => ({
+                  date: d.ds.slice(0, 10),
+                  netWorth: parseFloat(d.yhat),
+                }));
+                setForecastData(cleaned);
+              })
+              .catch(() => setError("Failed to fetch forecast data."));
+          }
+
+          // 🏦 Loan payoff
+          const loanAmount = parseFloat(userData.loanAmount || 0);
+          const emi = parseFloat(userData.emi || userData.monthlyEMI || 0);
+          if (loanAmount > 0 && emi > 0) {
+            fetch(`${import.meta.env.VITE_API_BASE}/loan-payoff`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                loanAmount: loanAmount,
+                monthlyEMI: emi,
+                interestRate: 10,
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                const cleaned = data.map((d) => ({
+                  month: d.month,
+                  remaining: d.remaining,
+                }));
+                setLoanData(cleaned);
+              })
+              .catch(() => setError("Failed to fetch loan payoff data."));
+          }
+        } else {
+          setError("⚠️ No user data found. Please fill in the form first.");
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Firestore error:", err);
+        setError("Failed to fetch data from Firestore.");
         setLoading(false);
-      });
-
-      // Net Worth Forecast
-      const income = parseFloat(parsed.income || 0);
-      const expenses = parseFloat(parsed.food || 0);
-      const savings = income - expenses;
-      if (savings > 0) {
-        fetch("http://localhost:5000/forecast", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ monthlySaving: savings }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            const cleaned = data.map((d) => ({
-              date: d.ds.slice(0, 10),
-              netWorth: parseFloat(d.yhat),
-            }));
-            setForecastData(cleaned);
-          });
       }
+    };
 
-      // Loan Payoff Forecast
-      const loanAmount = parseFloat(parsed.loanAmount || 0);
-      const emi = parseFloat(parsed.emi || 0);
-      if (loanAmount > 0 && emi > 0) {
-        fetch("http://localhost:5000/loan-payoff", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            loanAmount: loanAmount,
-            monthlyEMI: emi,
-            interestRate: 10,
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            const cleaned = data.map((d) => ({
-              month: d.month,
-              remaining: d.remaining,
-            }));
-            setLoanData(cleaned);
-          });
-      }
-    } else {
-      setLoading(false);
-    }
+    fetchLatestUserData();
   }, []);
 
-  if (loading) return <p className="text-center text-gray-500 mt-10">Loading insights...</p>;
-  if (!formData || Object.keys(formData).length === 0) return <p className="text-center text-gray-500 mt-10">No data found.</p>;
+  if (loading) return <p className="text-center text-gray-500 mt-10">⏳ Loading insights...</p>;
+  if (error) return <p className="text-center text-red-600 mt-10">{error}</p>;
+  if (!formData || Object.keys(formData).length === 0)
+    return <p className="text-center text-gray-500 mt-10">⚠️ No data found. Please complete the form or upload a statement.</p>;
 
+  // 📊 Summary cards
   const summaryData = [
     { label: "Monthly Income", value: formData.income, color: "bg-green-100 text-green-700" },
     { label: "Monthly Expenses", value: formData.food, color: "bg-red-100 text-red-700" },
@@ -137,10 +166,10 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* 📈 Charts */}
+      {/* Charts */}
       <div className="mt-12 space-y-12">
-        {/* Net Worth Forecast */}
-        {forecastData.length > 0 && (
+        {/* Forecast */}
+        {forecastData.length > 0 ? (
           <div className="bg-white p-4 rounded shadow-md">
             <h3 className="text-lg font-semibold mb-2">📈 Net Worth Forecast</h3>
             <ResponsiveContainer width="100%" height={250}>
@@ -154,10 +183,12 @@ export default function Dashboard() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+        ) : (
+          <p className="text-gray-500 text-center">⚠️ No forecast data available</p>
         )}
 
-        {/* Loan Payoff Timeline */}
-        {loanData.length > 0 && (
+        {/* Loan Payoff */}
+        {loanData.length > 0 ? (
           <div className="bg-white p-4 rounded shadow-md">
             <h3 className="text-lg font-semibold mb-2">💳 Loan Payoff Timeline</h3>
             <ResponsiveContainer width="100%" height={250}>
@@ -171,9 +202,11 @@ export default function Dashboard() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+        ) : (
+          <p className="text-gray-500 text-center">⚠️ No loan payoff data available</p>
         )}
 
-        {/* Expense Breakdown */}
+        {/* Expenses */}
         <div className="bg-white p-4 rounded shadow-md">
           <h3 className="text-lg font-semibold mb-2">🧾 Monthly Expense Breakdown</h3>
           <ResponsiveContainer width="100%" height={250}>
