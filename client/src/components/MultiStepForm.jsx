@@ -6,68 +6,88 @@ import StepLiabilities from "./steps/StepLiabilities";
 import StepPersonal from "./steps/StepPersonal";
 import StepReview from "./steps/StepReview";
 
-// Required fields by step index
 const requiredFields = {
-  0: ['income'],                     // StepIncome
-  1: ['rent', 'food', 'transport'], // StepExpenses
-  2: ['savings'],                   // StepAssets
-  3: ['loanAmount', 'emi'],         // StepLiabilities
-  4: ['age', 'profession'],         // StepPersonal
+  0: ["income"],
+  1: ["rent", "food", "transport"],
+  2: ["savings"],
+  3: ["loanAmount", "emi"],
+  4: ["age", "profession"],
 };
 
 const steps = [
-  StepIncome,
-  StepExpenses,
-  StepAssets,
-  StepLiabilities,
-  StepPersonal,
-  StepReview,
+  { component: StepIncome, title: "Income" },
+  { component: StepExpenses, title: "Expenses" },
+  { component: StepAssets, title: "Assets" },
+  { component: StepLiabilities, title: "Liabilities" },
+  { component: StepPersonal, title: "Personal Info" },
+  { component: StepReview, title: "Review & Submit" },
 ];
 
 export default function MultiStepForm() {
-  const [step, setStep] = useState(0);              
-  const [formData, setFormData] = useState({});   
+  const [step, setStep] = useState(0);
+  const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
 
-  const StepComponent = steps[step];
+  const StepComponent = steps[step].component;
+
+  const validateStep = () => {
+    const keysToCheck = requiredFields[step] || [];
+    const newErrors = {};
+    for (let key of keysToCheck) {
+      if (!formData[key]) {
+        newErrors[key] = `${key} is required`;
+      }
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const next = () => {
-    const keysToCheck = requiredFields[step] || [];
-    const isValid = keysToCheck.every(
-      (key) => formData[key] !== undefined && formData[key] !== ""
-    );
-
-    if (!isValid) {
-      alert("Please fill in all required fields before continuing.");
-      return;
-    }
-
+    if (!validateStep()) return;
     setStep((prev) => Math.min(prev + 1, steps.length - 1));
   };
 
   const back = () => setStep((prev) => Math.max(prev - 1, 0));
 
-  const updateForm = (data) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+  const updateData = (newData) => {
+    setFormData((prev) => ({ ...prev, ...newData }));
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto bg-white rounded-xl shadow-md">
-      <StepComponent formData={formData} updateForm={updateForm} />
+    <div>
+      {/* Progress Indicator */}
+      <div className="flex justify-between mb-6">
+        {steps.map((s, i) => (
+          <div
+            key={i}
+            className={`flex-1 text-center text-sm ${
+              i === step ? "font-bold text-blue-600" : "text-gray-400"
+            }`}
+          >
+            {s.title}
+          </div>
+        ))}
+      </div>
+
+      <StepComponent formData={formData} updateData={updateData} errors={errors} />
+
       <div className="flex justify-between mt-6">
         <button
           onClick={back}
           disabled={step === 0}
-          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
         >
           Back
         </button>
-        <button
-          onClick={next}
-          disabled={step === steps.length - 1}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Next
-        </button>
+
+        {step < steps.length - 1 ? (
+          <button
+            onClick={next}
+            className="px-4 py-2 bg-blue-600 text-white rounded"
+          >
+            Next
+          </button>
+        ) : null}
       </div>
     </div>
   );

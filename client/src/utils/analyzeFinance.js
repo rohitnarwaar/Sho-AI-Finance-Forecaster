@@ -1,37 +1,4 @@
-import { OpenAI } from "openai";
-
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY, // secure in .env
-  dangerouslyAllowBrowser: true,
-});
-
-export default async function analyzeFinance(data) {
-  const localInsights = generateLocalMetrics(data);
-
-  const prompt = `
-You're a financial advisor. Based on this user's financial data, give:
-- Net worth analysis
-- Budget feedback
-- Debt advice
-- Goal alignment
-- Investment strategy
-
-User Data:
-${JSON.stringify(data, null, 2)}
-`;
-
-  const response = await openai.chat.completions.create({
-    messages: [{ role: "user", content: prompt }],
-    model: "gpt-4",
-  });
-
-  const aiSummary = response.choices[0].message.content;
-
-  return {
-    ...localInsights,
-    aiSummary,
-  };
-}
+// client/src/utils/analyzeFinance.js
 
 function generateLocalMetrics(data) {
   const income = parseFloat(data.monthlyIncome || 0);
@@ -71,4 +38,43 @@ function generateLocalMetrics(data) {
       ? "You're saving money. Keep going!"
       : "You're overspending. Reduce your expenses.",
   };
+}
+
+export default async function analyzeFinance(data) {
+  const localInsights = generateLocalMetrics(data);
+
+  const prompt = `
+You're a financial advisor. Based on this user's financial data, give:
+- Net worth analysis
+- Budget feedback
+- Debt advice
+- Goal alignment
+- Investment strategy
+
+User Data:
+${JSON.stringify(data, null, 2)}
+`;
+
+  try {
+    // ✅ Call Flask backend (Gemini)
+    const res = await fetch(`${import.meta.env.VITE_API_BASE}/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, context: data }),
+    });
+
+    const json = await res.json();
+    const aiSummary = json.result || "⚠️ AI analysis failed.";
+
+    return {
+      ...localInsights,
+      aiSummary,
+    };
+  } catch (err) {
+    console.error("Gemini analysis error:", err);
+    return {
+      ...localInsights,
+      aiSummary: "⚠️ AI analysis failed. Please try again.",
+    };
+  }
 }
