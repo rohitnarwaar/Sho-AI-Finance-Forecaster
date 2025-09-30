@@ -14,6 +14,9 @@ export default function Dashboard() {
   const [forecastData, setForecastData] = useState([]);
   const [loanData, setLoanData] = useState([]);
   const [error, setError] = useState("");
+  const [retirementData, setRetirementData] = useState([]);
+  const [corpus, setCorpus] = useState({});
+
 
   useEffect(() => {
     const fetchLatestUserData = async () => {
@@ -94,6 +97,31 @@ export default function Dashboard() {
     };
 
     fetchLatestUserData();
+
+    // 🏖️ Retirement Corpus Forecast
+    if (parsed.income && parsed.age && parsed.retirementAge) {
+      fetch(`${import.meta.env.VITE_API_BASE}/retirement-forecast`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          monthlySaving: savings > 0 ? savings : 0,
+          currentAge: parseInt(parsed.age),
+          retirementAge: parseInt(parsed.retirementAge),
+          expectedReturn: 0.08,
+          inflation: 0.05,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setRetirementData(data.forecast || []);
+          setCorpus({
+            nominal: data.corpus,
+            adjusted: data.inflationAdjustedCorpus,
+          });
+        })
+        .catch(() => setError("Failed to fetch retirement forecast."));
+    }
+
   }, []);
 
   if (loading) return <p className="text-center text-gray-500 mt-10">⏳ Loading insights...</p>;
@@ -226,6 +254,27 @@ export default function Dashboard() {
               <Bar dataKey="amount" fill="#10b981" />
             </BarChart>
           </ResponsiveContainer>
+          {/* Retirement Corpus Forecast */}
+          {retirementData.length > 0 && (
+            <div className="bg-white p-4 rounded shadow-md">
+              <h3 className="text-lg font-semibold mb-2">🏖️ Retirement Corpus Forecast</h3>
+              <p className="mb-2 text-gray-700">
+                Estimated Corpus: <strong>₹{corpus.nominal?.toLocaleString()}</strong><br />
+                Inflation Adjusted Corpus: <strong>₹{corpus.adjusted?.toLocaleString()}</strong>
+              </p>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={retirementData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="ds" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="yhat" stroke="#16a34a" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
         </div>
       </div>
     </div>

@@ -52,6 +52,48 @@ def analyze():
         return jsonify({"result": response.text.strip()})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    @app.route("/retirement-forecast", methods=["POST"]) 
+def retirement_forecast():
+    try:
+        data = request.get_json()
+        monthly_saving = float(data.get("monthlySaving", 0))
+        current_age = int(data.get("currentAge", 30))
+        retirement_age = int(data.get("retirementAge", 60))
+        expected_return = float(data.get("expectedReturn", 0.08))  # 8% CAGR default
+        inflation = float(data.get("inflation", 0.05))  # 5% default
+
+        # Years until retirement
+        years = retirement_age - current_age
+        months = years * 12
+
+        # Approximate corpus using compounding
+        corpus = 0
+        for _ in range(months):
+            corpus = (corpus + monthly_saving) * (1 + expected_return / 12)
+
+        # Adjust for inflation
+        adjusted_corpus = corpus / ((1 + inflation) ** years)
+
+        # Forecast curve (for chart)
+        forecast = []
+        balance = 0
+        for m in range(months):
+            balance = (balance + monthly_saving) * (1 + expected_return / 12)
+            forecast.append({
+                "ds": (datetime.date.today() + pd.DateOffset(months=m)).strftime("%Y-%m"),
+                "yhat": balance
+            })
+
+        return jsonify({
+            "corpus": round(corpus, 2),
+            "inflationAdjustedCorpus": round(adjusted_corpus, 2),
+            "forecast": forecast
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
