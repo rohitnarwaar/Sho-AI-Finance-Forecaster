@@ -5,95 +5,126 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import google.generativeai as genai
 
-# Load environment variables from .env
+from forecast_module import (
+    forecast_savings,
+    forecast_loan_payoff,
+    forecast_retirement_corpus,
+)
+
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Configure Gemini
-if not GEMINI_API_KEY:
-    raise RuntimeError("❌ GEMINI_API_KEY missing in Server/.env")
-genai.configure(api_key=GEMINI_API_KEY)
-
-# Use latest correct model ID
-MODEL_ID = "models/gemini-2.5-flash-preview-05-20"
-model = genai.GenerativeModel(MODEL_ID)
-
-@app.get("/health")
+# ---------- Health ----------
+@app.route("/health", methods=["GET"])
 def health():
-    """Check API health & model"""
-    return {"status": "ok", "model": MODEL_ID}
+    return jsonify({"ok": True}), 200
 
-@app.get("/list-models")
-def list_models():
-    """Debug helper: list available models"""
-    models = [m.name for m in genai.list_models()]
-    return {"available_models": models}
-
-@app.post("/analyze")
-def analyze():
-    """Analyze finance data with Gemini"""
+# ---------- Savings forecast ----------
+@app.route("/forecast", methods=["POST"])
+def forecast_route():
     try:
         data = request.get_json(force=True) or {}
-        prompt = data.get("prompt", "").strip()
+        monthly_saving = float(data.get("monthlySaving", 0))
+        months = int(data.get("months", 120))
+        if monthly_saving < 0 or months <= 0:
+            return jsonify({"error": "Invalid inputs"}), 400
+
+        series = forecast_savings(monthly_saving, months=months)
+        return jsonify({"series": series}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ---------- Loan payoff ----------
+@app.route("/loan-payoff", methods=["POST"])
+def loan_payoff_route():
+    try:
+        data = request.get_json(force=True) or {}
+        principal = float(data.get("principal", 0))
+        annual_interest_rate = float(data.get("annualInterestRate", 0))
+        monthly_emi = float(data.get("monthlyEmi", 0))
+
+        if principal <= 0 or annual_interest_rate < 0 or monthly_emi <= 0:
+            return jsonify({"error": "Invalid inputs"}), 400
+
+        timeline = forecast_loan_payoff(
+            principal=principal,
+            annual_interest_rate=annual_interest_rate,
+            monthly_emi=monthly_emi,
+        )
+        return jsonify({"timeline": timeline}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ---------- Retirement corpus ----------
+@app.route("/retirement", methods=["POST"])
+def retirement_route():
+    try:
+        data = request.get_json(force=True) or {}
+        current_savings = float(data.get("currentSavings", 0))
+        monthly_contribution = float(data.get("monthlyContribution", 0))
+        annual_return_rate = float(data.get("annualReturnRate", 0.08))
+        months = int(data.get("months", 360))  # 30 years default
+
+        if current_savings < 0 or monthly_contribution < 0 or months <= 0:
+            return jsonify({"error": "Invalid inputs"}), 400
+
+        corpus = forecast_retirement_corpus(
+            current_savings=current_savings,
+            monthly_contribution=monthly_contribution,
+            annual_return_rate=annual_return_rate,
+            months=months,
+        )
+        return jsonify({"corpus": corpus}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ---------- AI Narrative (Gemini) ----------
+@app.route("/analyze", methods=["POST"])
+def analyze_route():
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "GEMINI_API_KEY not set"}), 500
+    try:
+        data = request.get_json(force=True) or {}
+        prompt = data.get("prompt", "Provide a concise personal finance analysis.")
         context = data.get("context", {})
 
-        if not prompt and not context:
-            return jsonify({"error": "Provide 'prompt' or 'context'"}), 400
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        user_text = f"""You're a financial advisor. Analyze this user's data:
+{context}
 
-        context_text = f"\n\n[DATA CONTEXT]\n{context}" if context else ""
-
-        response = model.generate_content(
-            f"You are a finance assistant. Analyze:\n\n{prompt}{context_text}"
-        )
-
-        return jsonify({"result": response.text.strip()})
+Return: 
+- Net worth analysis
+- Budget feedback
+- Debt advice
+- Short actionable checklist (max 5 bullets)
+"""
+        resp = model.generate_content(user_text)
+        text = resp.text if hasattr(resp, "text") else str(resp)
+        return jsonify({"summary": text}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-    @app.route("/retirement-forecast", methods=["POST"]) 
-def retirement_forecast():
+
+# ---------- What-if (optional convenience) ----------
+@app.route("/simulate", methods=["POST"])
+def simulate_route():
     try:
-        data = request.get_json()
-        monthly_saving = float(data.get("monthlySaving", 0))
-        current_age = int(data.get("currentAge", 30))
-        retirement_age = int(data.get("retirementAge", 60))
-        expected_return = float(data.get("expectedReturn", 0.08))  # 8% CAGR default
-        inflation = float(data.get("inflation", 0.05))  # 5% default
+        data = request.get_json(force=True) or {}
+        base = float(data.get("baseMonthlySaving", 0))
+        delta = float(data.get("deltaMonthlySaving", 0))
+        months = int(data.get("months", 120))
+        if months <= 0:
+            return jsonify({"error": "Invalid months"}), 400
 
-        # Years until retirement
-        years = retirement_age - current_age
-        months = years * 12
-
-        # Approximate corpus using compounding
-        corpus = 0
-        for _ in range(months):
-            corpus = (corpus + monthly_saving) * (1 + expected_return / 12)
-
-        # Adjust for inflation
-        adjusted_corpus = corpus / ((1 + inflation) ** years)
-
-        # Forecast curve (for chart)
-        forecast = []
-        balance = 0
-        for m in range(months):
-            balance = (balance + monthly_saving) * (1 + expected_return / 12)
-            forecast.append({
-                "ds": (datetime.date.today() + pd.DateOffset(months=m)).strftime("%Y-%m"),
-                "yhat": balance
-            })
-
-        return jsonify({
-            "corpus": round(corpus, 2),
-            "inflationAdjustedCorpus": round(adjusted_corpus, 2),
-            "forecast": forecast
-        })
-
+        base_series = forecast_savings(base, months=months)
+        bump_series = forecast_savings(base + delta, months=months)
+        return jsonify({"base": base_series, "bump": bump_series}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", "8080"))
+    app.run(host="0.0.0.0", port=port)
