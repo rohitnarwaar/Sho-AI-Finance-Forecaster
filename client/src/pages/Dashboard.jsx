@@ -14,9 +14,12 @@ export default function Dashboard() {
   const [forecastData, setForecastData] = useState([]);
   const [loanData, setLoanData] = useState([]);
   const [error, setError] = useState("");
+<<<<<<< HEAD
   const [retirementData, setRetirementData] = useState([]);
   const [corpus, setCorpus] = useState({});
 
+=======
+>>>>>>> 4536c6fcd0dea097fd30eaad4617d74f5774f84a
 
   useEffect(() => {
     const fetchLatestUserData = async () => {
@@ -97,6 +100,7 @@ export default function Dashboard() {
     };
 
     fetchLatestUserData();
+<<<<<<< HEAD
 
     // 🏖️ Retirement Corpus Forecast
     if (parsed.income && parsed.age && parsed.retirementAge) {
@@ -122,6 +126,8 @@ export default function Dashboard() {
         .catch(() => setError("Failed to fetch retirement forecast."));
     }
 
+=======
+>>>>>>> 4536c6fcd0dea097fd30eaad4617d74f5774f84a
   }, []);
 
   if (loading) return <p className="text-center text-gray-500 mt-10">⏳ Loading insights...</p>;
@@ -254,6 +260,7 @@ export default function Dashboard() {
               <Bar dataKey="amount" fill="#10b981" />
             </BarChart>
           </ResponsiveContainer>
+<<<<<<< HEAD
           {/* Retirement Corpus Forecast */}
           {retirementData.length > 0 && (
             <div className="bg-white p-4 rounded shadow-md">
@@ -275,6 +282,8 @@ export default function Dashboard() {
             </div>
           )}
 
+=======
+>>>>>>> 4536c6fcd0dea097fd30eaad4617d74f5774f84a
         </div>
       </div>
     </div>
