@@ -8,7 +8,7 @@ import StepReview from "./steps/StepReview";
 
 const requiredFields = {
   0: ["income"],
-  1: ["rent", "food", "transport"],
+  1: ["rent", "food", "transport", "misc"],
   2: ["savings"],
   3: ["loanAmount", "emi"],
   4: ["age", "profession"],
@@ -60,22 +60,21 @@ export default function MultiStepForm() {
         {steps.map((s, i) => (
           <div
             key={i}
-            className={`flex-1 text-center text-sm ${
-              i === step ? "font-bold text-blue-600" : "text-gray-400"
-            }`}
+            className={`flex-1 text-center text-sm ${i === step ? "font-bold text-blue-600" : "text-gray-400"
+              }`}
           >
             {s.title}
           </div>
         ))}
       </div>
 
-      <StepComponent formData={formData} updateData={updateData} errors={errors} />
+      <StepComponent formData={formData} updateForm={updateData} errors={errors} />
 
       <div className="flex justify-between mt-6">
         <button
           onClick={back}
           disabled={step === 0}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          className="px-4 py-2 bg-gray-400 rounded disabled:opacity-50"
         >
           Back
         </button>

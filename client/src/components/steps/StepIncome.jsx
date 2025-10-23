@@ -5,7 +5,7 @@ export default function StepIncome({ formData, updateForm }) {
       <label className="block mb-2 text-sm font-medium">Monthly Income (₹)</label>
       <input
         type="number"
-        value={formData.income}
+        value={formData.income || ""}
         onChange={(e) => updateForm({ income: e.target.value })}
         className="w-full p-2 border rounded"
       />

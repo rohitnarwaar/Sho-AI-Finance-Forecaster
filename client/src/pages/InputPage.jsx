@@ -10,7 +10,7 @@ export default function InputPage() {
         Provide your income, expenses, assets, and liabilities. This helps LifeLedger generate personalized insights.
       </p>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
+      <div className="bg-black shadow-md rounded-lg p-6">
         <MultiStepForm />
       </div>
     </div>
