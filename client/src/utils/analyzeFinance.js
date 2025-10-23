@@ -57,7 +57,7 @@ ${JSON.stringify(data, null, 2)}
 
   try {
     // ✅ Call Flask backend (Gemini)
-    const res = await fetch(`${import.meta.env.VITE_API_BASE}/analyze`, {
+    const res = await fetch("http://192.168.29.150:8080/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt, context: data }),

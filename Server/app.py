@@ -1,4 +1,3 @@
-# Server/app.py
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -13,6 +12,8 @@ from forecast_module import (
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+print("✅ GEMINI_API_KEY loaded:", bool(GEMINI_API_KEY))
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -84,29 +85,43 @@ def retirement_route():
 # ---------- AI Narrative (Gemini) ----------
 @app.route("/analyze", methods=["POST"])
 def analyze_route():
-    if not GEMINI_API_KEY:
-        return jsonify({"error": "GEMINI_API_KEY not set"}), 500
     try:
+        if not GEMINI_API_KEY:
+            print("❌ Missing GEMINI_API_KEY")
+            return jsonify({"error": "GEMINI_API_KEY not set"}), 500
+
         data = request.get_json(force=True) or {}
+        print("📩 Incoming /analyze data:", data)
+
         prompt = data.get("prompt", "Provide a concise personal finance analysis.")
         context = data.get("context", {})
 
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel("gemini-1.5-flash")
+
         user_text = f"""You're a financial advisor. Analyze this user's data:
 {context}
 
-Return: 
+Return:
 - Net worth analysis
 - Budget feedback
 - Debt advice
 - Short actionable checklist (max 5 bullets)
 """
+
+        print("🧠 Sending prompt to Gemini API...")
         resp = model.generate_content(user_text)
-        text = resp.text if hasattr(resp, "text") else str(resp)
+        print("✅ Gemini API response received")
+
+        text = getattr(resp, "text", str(resp))
         return jsonify({"summary": text}), 200
+
     except Exception as e:
+        import traceback
+        print("❌ ERROR in /analyze route:", e)
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
 
 # ---------- What-if (optional convenience) ----------
 @app.route("/simulate", methods=["POST"])
