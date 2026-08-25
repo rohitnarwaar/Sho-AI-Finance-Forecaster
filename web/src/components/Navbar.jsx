@@ -20,7 +20,7 @@ export default function Navbar() {
       className="fixed top-4 left-1/2 z-50 w-[90%] max-w-2xl glass-panel text-white px-8 py-3 rounded-full shadow-2xl flex justify-between items-center backdrop-blur-xl bg-black/40"
     >
       <Link href="/" className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-        AXIOMÉ
+        VANTAGE
       </Link>
 
       <div className="flex gap-6">

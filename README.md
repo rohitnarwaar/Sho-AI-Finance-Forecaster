@@ -1,8 +1,8 @@
-# AXIOMÉ 🚀
+# VANTAGE 🚀
 
 **AI-Powered Financial Forecasting & Wealth Management**
 
-AXIOMÉ is a cutting-edge personal finance application that goes beyond simple tracking. It creates a "Digital Twin" of your financial life, using AI to forecast your Net Worth, Retirement Corpus, and Debt Freedom timeline in real-time based on your daily transaction behavior.
+VANTAGE is a cutting-edge personal finance application that goes beyond simple tracking. It creates a "Digital Twin" of your financial life, using AI to forecast your Net Worth, Retirement Corpus, and Debt Freedom timeline in real-time based on your daily transaction behavior.
 
 ![Dashboard Preview](web/public/favicon.ico) *Add a screenshot here if available*
 

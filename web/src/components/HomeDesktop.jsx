@@ -116,19 +116,19 @@ export default function HomeDesktop() {
             {/* Hero Section - Centered */}
             <div className="relative z-10 flex w-full min-h-screen px-6 pb-12">
                 <div className="flex flex-col justify-center w-full">
-                    <div className="absolute left-[15%] top-[58%] -translate-y-1/2">
+                    <div className="absolute left-[14%] top-[58%] -translate-y-1/2">
                         <motion.h1
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 1.2, delay: 0.3 }}
-                            className="text-[7rem] sm:text-[9rem] md:text-[11rem] lg:text-[13rem] xl:text-[16rem] font-bold tracking-tight leading-none text-left"
+                            className="text-[clamp(3.5rem,12vw,14.5rem)] font-bold tracking-tight leading-none text-left whitespace-nowrap"
                             style={{
                                 color: textColor,
                                 WebkitTextStroke: '1.5px black',
                                 letterSpacing: '0.0em'
                             }}
                         >
-                            AXIOMÉ
+                            VANTAGE
                         </motion.h1>
                     </div>
 
@@ -169,10 +169,10 @@ export default function HomeDesktop() {
                 >
                     <h3 className="text-xs tracking-widest font-bold uppercase">INFO</h3>
                     <p className="text-sm leading-relaxed font-mono">
-                        AXIOMÉ(ax-i-oh-may)is a personal system for modeling the present and reasoning about the future.
+                        VANTAGE is a personal system for modeling the present and reasoning about the future.
                     </p>
                     <p className="text-sm leading-relaxed font-mono">
-                        It brings together fragmented financial signals into a coherent structure, allowing patterns, risks, and possibilities to surface over time. Rather than recording what has already happened, AXIOMÉ focuses on exploring what could happen, and why.<br />
+                        It brings together fragmented financial signals into a coherent structure, allowing patterns, risks, and possibilities to surface over time. Rather than recording what has already happened, VANTAGE focuses on exploring what could happen, and why.<br />
                         Designed as a thinking companion, the system helps individuals understand consequences before decisions are made, offering clarity without noise and foresight without prescription.
                     </p>
                 </motion.div>
@@ -260,7 +260,7 @@ export default function HomeDesktop() {
                         HOW IT WORKS
                     </h3>
                     <p className="text-sm leading-relaxed font-mono opacity-70 max-w-xl mb-12">
-                        AXIOMÉ helps people clearly see where their money stands today and what it could look like in the future.
+                        VANTAGE helps people clearly see where their money stands today and what it could look like in the future.
                     </p>
 
                     <div className="space-y-8 text-base font-mono">
@@ -352,7 +352,7 @@ export default function HomeDesktop() {
                         {/* Logo */}
                         <div className="flex-shrink-0">
                             <div className="text-2xl font-bold tracking-tight">
-                                AXIOMÉ
+                                VANTAGE
                             </div>
                         </div>
 
@@ -360,7 +360,7 @@ export default function HomeDesktop() {
                         <div className="flex gap-24 text-xs">
                             <div>
                                 <p className="mb-1">Support:</p>
-                                <p>hello@axiome.com</p>
+                                <p>hello@vantage.com</p>
                             </div>
                             <div>
                                 <p className="mb-1">Rights:</p>

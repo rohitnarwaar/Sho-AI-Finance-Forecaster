@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AXIOMÉ is an AI-powered personal finance app: a Next.js frontend backed by a Flask API. The frontend persists data to Firebase Firestore in real time and calls the Flask backend for forecasting math, ML clustering, and AI-generated insights.
+VANTAGE is an AI-powered personal finance app: a Next.js frontend backed by a Flask API. The frontend persists data to Firebase Firestore in real time and calls the Flask backend for forecasting math, ML clustering, and AI-generated insights.
 
 The repo is split into two independently run/deployed halves:
 - `web/` — Next.js 16 (App Router) frontend

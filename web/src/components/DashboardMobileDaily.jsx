@@ -23,7 +23,6 @@ export default function DashboardMobileDaily({
     budgetLimit,
     categorySpend,
     categoryBudgets,
-    userRole,
     currentUser,
     onCreateGoal,
     onSetBudget,
@@ -47,7 +46,7 @@ export default function DashboardMobileDaily({
             </div>
 
             {/* ── Daily Score ── */}
-            <DailyScoreWidget userData={formData} transactions={transactions} />
+            <DailyScoreWidget userData={formData} transactions={transactions} dailyScore={dailyInsights?.dailyScore} />
 
             <div className="h-px bg-black opacity-[0.05]" />
 
@@ -66,7 +65,6 @@ export default function DashboardMobileDaily({
                 categorySpend={categorySpend}
                 categoryBudgets={categoryBudgets}
                 onSetCategoryBudget={onSetCategoryBudget}
-                disabled={userRole === 'viewer'}
             />
 
             <div className="h-px bg-black opacity-[0.05]" />
@@ -75,7 +73,6 @@ export default function DashboardMobileDaily({
             <GoalsWidget
                 goals={goals}
                 onCreateGoal={onCreateGoal}
-                disabled={userRole === 'viewer'}
             />
 
             <div className="h-px bg-black opacity-[0.05]" />
@@ -86,7 +83,6 @@ export default function DashboardMobileDaily({
                 onAdd={onAddSubscription}
                 onUpdate={onUpdateSubscription}
                 onDelete={onDeleteSubscription}
-                disabled={userRole === 'viewer'}
             />
 
             <div className="h-px bg-black opacity-[0.05]" />
@@ -112,17 +108,15 @@ export default function DashboardMobileDaily({
             </div>
 
             {/* ── Floating Add Transaction ── */}
-            {userRole === 'admin' && (
-                <motion.button
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5, type: "spring" }}
-                    onClick={() => setShowAddTransaction(true)}
-                    className="fixed bottom-24 right-6 w-14 h-14 bg-black text-white rounded-full flex items-center justify-center text-2xl shadow-lg hover:scale-110 transition-transform z-30"
-                >
-                    +
-                </motion.button>
-            )}
+            <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: "spring" }}
+                onClick={() => setShowAddTransaction(true)}
+                className="fixed bottom-24 right-6 w-14 h-14 bg-black text-white rounded-full flex items-center justify-center text-2xl shadow-lg hover:scale-110 transition-transform z-30"
+            >
+                +
+            </motion.button>
 
             <QuickAddTransaction
                 isOpen={showAddTransaction}

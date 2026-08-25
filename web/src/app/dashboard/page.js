@@ -31,9 +31,9 @@ import DashboardMobileWealth from "@/components/DashboardMobileWealth";
 import DashboardMobileInsights from "@/components/DashboardMobileInsights";
 
 export default function Dashboard() {
-    const [userRole, setUserRole] = useState("admin"); // "admin" or "viewer"
     const [formData, setFormData] = useState({});
     const [insights, setInsights] = useState(null);
+    const [insightsError, setInsightsError] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
@@ -589,6 +589,36 @@ export default function Dashboard() {
         loadInsights();
     }, [formData, transactions, goals]); // Depend on transactions/goals to re-run analysis
 
+    // --- AI Advisor fetch (also used as a manual retry after a failure) ---
+    const fetchAdvisorInsights = async (totalIncomeOverride) => {
+        if (!formData || Object.keys(formData).length === 0) return;
+
+        const totalIncome = totalIncomeOverride ?? (parseFloat(formData.income || 0) + monthlyIncome);
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/analyze`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    context: {
+                        ...formData,
+                        real_income: totalIncome,
+                        real_expenses: monthlySpent
+                    }
+                }),
+            });
+            const result = await res.json();
+            if (result.summary) {
+                setInsights(result);
+            } else {
+                setInsightsError(true);
+            }
+        } catch (err) {
+            console.error("Dynamic AI fetch failed:", err);
+            setInsightsError(true);
+        }
+    };
+
     // --- Dynamic Forecasts (Real-time Integration) ---
     useEffect(() => {
         if (!formData || Object.keys(formData).length === 0) return;
@@ -706,22 +736,9 @@ export default function Dashboard() {
         }
 
         // 4. Dynamic Advisor AI
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/analyze`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                context: {
-                    ...formData,
-                    real_income: totalIncome,
-                    real_expenses: monthlySpent
-                }
-            }),
-        })
-            .then(res => res.json())
-            .then(result => {
-                if (result.summary) setInsights(result);
-            })
-            .catch(err => console.error("Dynamic AI fetch failed:", err));
+        (async () => {
+            await fetchAdvisorInsights(totalIncome);
+        })();
 
     }, [formData, monthlySpent, monthlyIncome, transactions]);
 
@@ -797,7 +814,6 @@ export default function Dashboard() {
                                 budgetLimit={budgetLimit}
                                 categorySpend={categorySpend}
                                 categoryBudgets={categoryBudgets}
-                                userRole={userRole}
                                 currentUser={currentUser}
                                 onCreateGoal={handleCreateGoal}
                                 onSetBudget={handleSetBudget}
@@ -831,7 +847,6 @@ export default function Dashboard() {
                                 setDeltaSavings={setDeltaSavings}
                                 runSimulation={runSimulation}
                                 simulateData={simulateData}
-                                userRole={userRole}
                             />
                         )}
 
@@ -846,39 +861,9 @@ export default function Dashboard() {
                                     <p className="text-xs opacity-40 uppercase tracking-widest">{currentUser?.email}</p>
                                 </div>
 
-                                {/* Role Switcher (Mobile) */}
-                                <div className="w-full pt-6">
-                                    <p className="text-[10px] tracking-widest uppercase opacity-40 mb-3 text-center">Access Level</p>
-                                    <div className="flex border border-black/10 overflow-hidden">
-                                        <button
-                                            onClick={() => setUserRole('admin')}
-                                            className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${
-                                                userRole === 'admin'
-                                                    ? 'bg-black text-white'
-                                                    : 'bg-white text-black/40 hover:text-black/70'
-                                            }`}
-                                        >
-                                            Admin
-                                        </button>
-                                        <button
-                                            onClick={() => setUserRole('viewer')}
-                                            className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${
-                                                userRole === 'viewer'
-                                                    ? 'bg-black text-white'
-                                                    : 'bg-white text-black/40 hover:text-black/70'
-                                            }`}
-                                        >
-                                            Viewer
-                                        </button>
-                                    </div>
-                                    {userRole === 'viewer' && (
-                                        <p className="text-[10px] text-yellow-600 mt-2 tracking-wide text-center">Read-only mode active</p>
-                                    )}
-                                </div>
-
                                 <div className="w-full space-y-3 pt-4">
-                                    <button 
-                                        onClick={() => navigate('/')}
+                                    <button
+                                        onClick={() => router.push('/')}
                                         className="w-full bg-black text-white py-4 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-black/90 transition-all border border-black"
                                     >
                                         Home
@@ -922,7 +907,7 @@ export default function Dashboard() {
                 <div>
                     {/* Brand */}
                     <div className="mb-12">
-                        <h1 className="text-sm tracking-[0.3em] uppercase font-bold">AXIOMÉ</h1>
+                        <h1 className="text-sm tracking-[0.3em] uppercase font-bold">VANTAGE</h1>
                         <div className="h-px bg-black/10 mt-4" />
                     </div>
 
@@ -963,24 +948,6 @@ export default function Dashboard() {
                         </button>
                     </nav>
 
-                    {/* Role Switcher */}
-                    <div className="mb-8">
-                        <p className="text-[10px] tracking-widest uppercase opacity-40 mb-3">Access</p>
-                        <div className="border border-black/10 px-3 py-2 flex items-center justify-between">
-                            <span className="text-[10px] uppercase tracking-widest opacity-60">Role</span>
-                            <select
-                                value={userRole}
-                                onChange={(e) => setUserRole(e.target.value)}
-                                className="bg-transparent text-xs tracking-wider uppercase focus:outline-none cursor-pointer text-right"
-                            >
-                                <option value="admin">Admin</option>
-                                <option value="viewer">Viewer</option>
-                            </select>
-                        </div>
-                        {userRole === 'viewer' && (
-                            <p className="text-[10px] text-yellow-600 mt-2 tracking-wide">Read-only mode active</p>
-                        )}
-                    </div>
                 </div>
 
                 {/* Bottom Section — Actions */}
@@ -1102,6 +1069,16 @@ export default function Dashboard() {
                                         <div className="text-sm leading-relaxed opacity-80">
                                             {insights ? (
                                                 <p className="whitespace-pre-line">{insights.summary}</p>
+                                            ) : insightsError ? (
+                                                <div>
+                                                    <p className="opacity-50 italic mb-3">Couldn&apos;t reach the advisor. Try again?</p>
+                                                    <button
+                                                        onClick={() => { setInsightsError(false); fetchAdvisorInsights(); }}
+                                                        className="text-xs tracking-widest uppercase border border-black px-4 py-2 hover:bg-black hover:text-white transition-colors"
+                                                    >
+                                                        Retry
+                                                    </button>
+                                                </div>
                                             ) : (
                                                 <p className="opacity-50 italic">Synthesizing data...</p>
                                             )}
@@ -1127,13 +1104,11 @@ export default function Dashboard() {
                                             step="1000"
                                             value={deltaSavings}
                                             onChange={(e) => setDeltaSavings(e.target.value)}
-                                            disabled={userRole === 'viewer'}
                                             className="grow md:grow-0 w-48 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
                                         />
                                         <span className="text-sm font-medium">₹{parseInt(deltaSavings).toLocaleString()}</span>
                                         <button
                                             onClick={runSimulation}
-                                            disabled={userRole === 'viewer'}
                                             className="px-6 py-2 border border-black text-xs tracking-widest uppercase hover:bg-black hover:text-white transition-colors"
                                         >
                                             Simulate
@@ -1257,10 +1232,10 @@ export default function Dashboard() {
                                                 {spendingClusters.map((item, idx) => (
                                                     <div
                                                         key={idx}
-                                                        className={`group relative flex justify-between items-center py-3 border-b border-black/[0.08] hover:bg-black/[0.005] transition-colors ${userRole === 'admin' ? 'cursor-pointer' : 'cursor-default'}`}
+                                                        className="group relative flex justify-between items-center py-3 border-b border-black/[0.08] hover:bg-black/[0.005] transition-colors cursor-pointer"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            if (userRole === 'admin') setEditingCategory(item.category);
+                                                            setEditingCategory(item.category);
                                                         }}
                                                     >
                                                         <div>
@@ -1281,7 +1256,7 @@ export default function Dashboard() {
                                                         ) : (
                                                             <div className="flex items-center gap-3">
                                                                 <span className="text-xs font-mono">₹{item.amount.toLocaleString()}</span>
-                                                                {userRole === 'admin' && <span className="text-[10px] opacity-0 group-hover:opacity-40 transition-opacity">EDIT</span>}
+                                                                <span className="text-[10px] opacity-0 group-hover:opacity-40 transition-opacity">EDIT</span>
                                                             </div>
                                                         )}
                                                     </div>
@@ -1312,7 +1287,7 @@ export default function Dashboard() {
 
                                 {/* Daily Overview Grid */}
                                 <div className="mb-12">
-                                    <DailyScoreWidget userData={formData} transactions={transactions} />
+                                    <DailyScoreWidget userData={formData} transactions={transactions} dailyScore={dailyInsights?.dailyScore} />
                                 </div>
 
                                 {/* Daily Financial Architecture: Stacked Budget/Goals + Subscriptions Side-by-Side */}
@@ -1326,10 +1301,9 @@ export default function Dashboard() {
                                             categorySpend={categorySpend}
                                             categoryBudgets={categoryBudgets}
                                             onSetCategoryBudget={handleSetCategoryBudget}
-                                            disabled={userRole === 'viewer'}
                                         />
                                         <div className="h-px bg-black opacity-[0.05]" />
-                                        <GoalsWidget goals={goals} onCreateGoal={handleCreateGoal} disabled={userRole === 'viewer'} />
+                                        <GoalsWidget goals={goals} onCreateGoal={handleCreateGoal} />
                                     </div>
 
                                     {/* Right: Recurring Commitments */}
@@ -1338,7 +1312,6 @@ export default function Dashboard() {
                                         onAdd={handleAddSubscription}
                                         onUpdate={handleUpdateSubscription}
                                         onDelete={handleDeleteSubscription}
-                                        disabled={userRole === 'viewer'}
                                     />
                                 </div>
 
@@ -1377,7 +1350,7 @@ export default function Dashboard() {
                 </main>
 
                 {/* Floating Add Transaction Button (Desktop Only - Mobile has it in navigation or drawer) */}
-                {activeView === "daily" && userRole === 'admin' && (
+                {activeView === "daily" && (
                     <motion.button
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}

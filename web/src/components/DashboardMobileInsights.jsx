@@ -4,7 +4,7 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend
 } from "recharts";
 
-export default function DashboardMobileInsights({ loanData, retirementData, deltaSavings, setDeltaSavings, runSimulation, simulateData, userRole }) {
+export default function DashboardMobileInsights({ loanData, retirementData, deltaSavings, setDeltaSavings, runSimulation, simulateData }) {
     return (
         <div className="flex flex-col gap-12 pb-32 pt-20 px-6 font-mono">
 
@@ -84,12 +84,10 @@ export default function DashboardMobileInsights({ loanData, retirementData, delt
                         step="1000"
                         value={deltaSavings}
                         onChange={(e) => setDeltaSavings(e.target.value)}
-                        disabled={userRole === 'viewer'}
                         className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
                     />
                     <button
                         onClick={runSimulation}
-                        disabled={userRole === 'viewer'}
                         className="w-full py-3 border border-black text-xs tracking-widest uppercase hover:bg-black hover:text-white transition-colors"
                     >
                         Simulate
