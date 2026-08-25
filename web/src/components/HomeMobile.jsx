@@ -177,7 +177,7 @@ export default function HomeMobile() {
             {/* Cassette Tape Section - Restored */}
             <div className="pb-20 px-6">
                 <h3 className="text-sm tracking-widest mb-8 font-light uppercase text-center opacity-80">
-                    SEE YOUR FUTURE — BEFORE YOU LIVE IT.
+                    SEE YOUR FUTURE, BEFORE YOU LIVE IT.
                 </h3>
                 <div className="flex justify-center">
                     <div className="w-full max-w-sm">

@@ -3,8 +3,7 @@ import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import CassetteImage from '@/assets/CASST.png';
-import CircleImage from '@/assets/CIRCLE.png';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 export default function HomeDesktop() {
@@ -12,8 +11,6 @@ export default function HomeDesktop() {
     const { currentUser, logout, checkOnboardingStatus } = useAuth();
     const router = useRouter();
 
-    const [activeStep, setActiveStep] = useState(0);
-    const stepRefs = useRef([]);
     const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
     const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
@@ -27,63 +24,6 @@ export default function HomeDesktop() {
         };
         checkStatus();
     }, [currentUser, checkOnboardingStatus]);
-
-    useEffect(() => {
-        const observers = [];
-
-        stepRefs.current.forEach((ref, index) => {
-            if (!ref) return;
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting) {
-                        setActiveStep(index);
-                    }
-                },
-                {
-                    rootMargin: "-40% 0px -40% 0px", // Trigger when item is near center
-                    threshold: 0
-                }
-            );
-
-            observer.observe(ref);
-            observers.push(observer);
-        });
-
-        return () => observers.forEach(obs => obs.disconnect());
-    }, []);
-
-    const getVisualState = (index) => {
-        if (index <= 3) {
-            // Early: I-IV
-            return {
-                scale: 0.8 + (index * 0.05), // 0.8 -> 0.95
-                blur: 8 - (index * 2),       // 8px -> 2px
-                brightness: 0.7 + (index * 0.05), // 0.7 -> 0.85
-                rotate: index * 2
-            };
-        } else if (index <= 8) {
-            // Middle: V-IX
-            const progress = index - 4;
-            return {
-                scale: 1,
-                blur: 0,
-                brightness: 1,
-                rotate: 10 + (progress * 5)
-            };
-        } else {
-            // Late: X-XIII
-            const progress = index - 9;
-            return {
-                scale: 1 + (progress * 0.05), // 1 -> 1.15
-                blur: progress * 1,           // 0 -> 3px (dreamy blur)
-                brightness: 1 + (progress * 0.1), // 1 -> 1.3
-                rotate: 35 + (progress * 10)
-            };
-        }
-    };
-
-    const visualState = getVisualState(activeStep);
 
     const handleLogout = async () => {
         try {
@@ -101,7 +41,7 @@ export default function HomeDesktop() {
     const backgroundColor = useTransform(
         scrollYProgress,
         [0, 0.1, 0.65, 0.7],
-        ['rgb(220, 38, 38)', 'rgb(255, 255, 255)', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)']
+        ['rgb(185, 28, 28)', 'rgb(255, 255, 255)', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)']
     );
 
     const textColor = useTransform(
@@ -112,13 +52,13 @@ export default function HomeDesktop() {
 
     return (
         <motion.div
-            className="min-h-[200vh]"
+            className="relative min-h-[200vh]"
             style={{ backgroundColor }}
         >
 
             {/* Navigation */}
             <motion.nav
-                className="relative z-20 flex justify-between items-center py-6"
+                className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center py-6"
                 style={{
                     color: textColor,
                     paddingLeft: '10%',
@@ -131,7 +71,7 @@ export default function HomeDesktop() {
                     transition={{ duration: 0.8 }}
                     className="text-sm tracking-widest font-bold"
                 >
-                    AXIOMÉ
+                    ONE&apos;S OWN
                 </motion.div>
 
                 <motion.div
@@ -174,35 +114,45 @@ export default function HomeDesktop() {
             </motion.nav>
 
             {/* Hero Section - Centered */}
-            <div className="relative z-10 flex w-full min-h-screen px-6">
+            <div className="relative z-10 flex w-full min-h-screen px-6 pb-12">
                 <div className="flex flex-col justify-center w-full">
-                    <motion.h1
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 1.2, delay: 0.3 }}
-                        className="w-full text-[6rem] sm:text-[8rem] md:text-[10rem] lg:text-[12rem] xl:text-[14rem] font-bold tracking-tight leading-none text-center"
-                        style={{
-                            WebkitTextStroke: '2px',
-                            WebkitTextStrokeColor: textColor,
-                            WebkitTextFillColor: 'transparent',
-                            letterSpacing: '0.0em'
-                        }}
-                    >
-                        AXIOMÉ
-                    </motion.h1>
+                    <div className="absolute left-[15%] top-[58%] -translate-y-1/2">
+                        <motion.h1
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1.2, delay: 0.3 }}
+                            className="text-[7rem] sm:text-[9rem] md:text-[11rem] lg:text-[13rem] xl:text-[16rem] font-bold tracking-tight leading-none text-left"
+                            style={{
+                                color: textColor,
+                                WebkitTextStroke: '1.5px black',
+                                letterSpacing: '0.0em'
+                            }}
+                        >
+                            AXIOMÉ
+                        </motion.h1>
+                    </div>
 
                     {/* Bottom Left Content */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.8 }}
-                        className="absolute bottom-16 left-[15%]"
+                        className="absolute bottom-12 left-[15%] flex flex-col items-start gap-6"
                         style={{ color: textColor }}
                     >
-                        <p className="text-xs tracking-widest mb-1 font-bold italic">COMPOSED OF:</p>
-                        <p className="text-sm leading-relaxed font-mono">
-                            Models · Forecasts · Scenarios
-                        </p>
+                        <div>
+                            <p className="text-xs tracking-widest mb-1 font-bold italic">COMPOSED OF:</p>
+                            <p className="text-sm leading-relaxed font-mono">
+                                Models · Forecasts · Scenarios
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => router.push(currentUser ? '/dashboard' : '/register')}
+                            className="text-xs tracking-widest font-mono px-6 py-3 rounded-full border transition-opacity hover:opacity-70"
+                            style={{ borderColor: textColor, color: textColor }}
+                        >
+                            {currentUser ? 'GO TO DASHBOARD →' : 'START MODELING YOUR FUTURE →'}
+                        </button>
                     </motion.div>
                 </div>
             </div>
@@ -222,7 +172,7 @@ export default function HomeDesktop() {
                         AXIOMÉ(ax-i-oh-may)is a personal system for modeling the present and reasoning about the future.
                     </p>
                     <p className="text-sm leading-relaxed font-mono">
-                        It brings together fragmented financial signals into a coherent structure — allowing patterns, risks, and possibilities to surface over time. Rather than recording what has already happened, AXIOMÉ focuses on exploring what could happen, and why.<br />
+                        It brings together fragmented financial signals into a coherent structure, allowing patterns, risks, and possibilities to surface over time. Rather than recording what has already happened, AXIOMÉ focuses on exploring what could happen, and why.<br />
                         Designed as a thinking companion, the system helps individuals understand consequences before decisions are made, offering clarity without noise and foresight without prescription.
                     </p>
                 </motion.div>
@@ -243,88 +193,42 @@ export default function HomeDesktop() {
                     }}
                 />
 
-                {/* Models & Scenarios Section */}
-                <motion.div className="flex gap-16 items-start pb-40 relative" style={{ marginLeft: '15%', marginRight: '15%', color: textColor }}>
+                {/* Models & Scenarios Section — Accordion Gallery */}
+                <motion.div className="pb-4" style={{ color: textColor }}>
+                    <h3 className="text-sm tracking-widest mb-12 font-light text-center z-10 font-mono">
+                        MODELS & SCENARIOS
+                    </h3>
 
-                    {/* Sticky Visual Lens */}
-                    <motion.div
-                        className="sticky top-0 w-1/2 h-screen flex flex-col items-center justify-center"
-                        style={{ color: textColor }}
-                    >
-                        <h3 className="text-sm tracking-widest mb-12 font-light text-center z-10 font-mono">
-                            MODELS & SCENARIOS
-                        </h3>
-                        <div className="relative w-[400px] h-[400px] rounded-full overflow-hidden border border-white/10">
-                            <motion.div
-                                animate={{
-                                    scale: visualState.scale,
-                                    rotate: visualState.rotate,
-                                    filter: `blur(${visualState.blur}px) brightness(${visualState.brightness})`,
-                                }}
-                                transition={{ duration: 1.5, ease: "easeInOut" }}
-                                className="w-full h-full"
+                    <div className="flex w-full h-[70vh] gap-1">
+                        {[
+                            { date: '01', title: 'Present State', desc: 'The baseline financial reality: income, expenses, and cash flow, all in one place.', target: 'net-worth', bg: '#141414' },
+                            { date: '02', title: 'Forecasts', desc: 'Savings, retirement, and long-term projections built from your real numbers.', target: 'retirement', bg: '#1c1c1c' },
+                            { date: '03', title: 'Debt & Risk', desc: 'Loan payoff timelines and volatility signals that flag exposure before it compounds.', target: 'debt', bg: '#141414' },
+                            { date: '04', title: 'Scenarios', desc: 'Run what-if simulations and see alternate outcomes before committing.', target: 'simulator', bg: '#1c1c1c' },
+                            { date: '05', title: 'Decision Notes', desc: 'AI-synthesized, actionable takeaways drawn directly from your data.', target: 'ai-advisor', bg: '#b91c1c' }
+                        ].map((panel, index) => (
+                            <div
+                                key={index}
+                                onClick={() => currentUser ? router.push(`/dashboard#${panel.target}`) : router.push('/login')}
+                                className="group relative h-full flex-1 hover:flex-5 transition-[flex-grow] duration-700 ease-in-out cursor-pointer overflow-hidden"
+                                style={{ backgroundColor: panel.bg }}
                             >
-                                <Image
-                                    src={CircleImage}
-                                    alt="Trajectory Lens"
-                                    className="w-full h-full object-cover"
-                                    priority
-                                />
-                            </motion.div>
-
-                            {/* Optional overlay for extra atmosphere */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-                        </div>
-                    </motion.div>
-
-                    {/* Scrollable Content List */}
-                    <motion.div
-                        className="w-1/2 pt-[10vh] pb-[10vh] pl-12"
-                        style={{ color: textColor }}
-                    >
-
-                        <div className="space-y-24 font-mono">
-                            {[
-                                { date: '01  /  I', city: 'Present State Model', desc: 'Baseline financial reality.', target: 'net-worth' },
-                                { date: '02  /  II', city: 'Income & Expense Structure', desc: 'Categorized inflows & outflows.', target: 'spending-tiers' },
-                                { date: '03  /  III', city: 'Cash Flow Patterns', desc: 'Timing & liquidity analysis.', target: 'net-worth' },
-                                { date: '04  /  IV', city: 'savings Forecast', desc: 'Projected accumulation curves.', target: 'net-worth' },
-                                { date: '05  /  V', city: 'spending Behaviour Signals', desc: 'Habitual anomalies detected.', target: 'spending-tiers' },
-                                { date: '06  /  VI', city: 'Risk Indicators', desc: 'Volatility & exposure stress-tests.', target: 'ai-advisor' },
-                                { date: '07  /  VII', city: 'short-Term Outlook', desc: '3-12 month liquidity horizon.', target: 'net-worth' },
-                                { date: '08  /  VIII', city: 'Long-Term Projections', desc: 'Multi-decade compound trajectories.', target: 'retirement' },
-                                { date: '09  /  IX', city: 'Loan Payoff Path', desc: 'Debt extinction timeline.', target: 'debt' },
-                                { date: '10  /  X', city: 'Retirement Projection', desc: 'Post-work sustainability model.', target: 'retirement' },
-                                { date: '11  /  XI', city: 'Net Worth Trajectory', desc: 'Total asset evolution.', target: 'net-worth' },
-                                { date: '12  /  XII', city: 'What-If Scenarios', desc: 'Alternative reality simulation.', target: 'simulator' },
-                                { date: '13  /  XIII', city: 'Decision Notes', desc: 'synthesized actionable intelligence.', target: 'ai-advisor' }
-                            ].map((show, index) => (
-                                <div
-                                    key={index}
-                                    ref={el => stepRefs.current[index] = el}
-                                    className={`transition-opacity duration-1000 ${index === activeStep ? 'opacity-100' : 'opacity-30'}`}
-                                >
-                                    <div className="flex flex-col gap-2">
-                                        <span className="text-xl font-light">{show.city}</span>
-                                        <p className="text-sm opacity-60 max-w-xs leading-relaxed">{show.desc}</p>
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                if (currentUser) {
-                                                    router.push(`/dashboard#${show.target}`);
-                                                } else {
-                                                    router.push('/login');
-                                                }
-                                            }}
-                                            className="text-left text-xs hover:opacity-70 transition-opacity mt-2 block underline decoration-1 underline-offset-4"
-                                        >
-                                            View Analysis →
-                                        </button>
-                                    </div>
+                                {/* Collapsed label */}
+                                <div className="absolute inset-0 flex items-end justify-center pb-10 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                                    <span className="text-xs tracking-widest font-mono text-white/80 [writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
+                                        {panel.date} / {panel.title}
+                                    </span>
                                 </div>
-                            ))}
-                        </div>
-                    </motion.div>
+
+                                {/* Expanded content */}
+                                <div className="absolute inset-0 flex flex-col justify-end p-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                    <span className="text-xs tracking-widest font-mono text-white/60 mb-2">{panel.date}</span>
+                                    <h4 className="text-2xl font-bold mb-3 font-mono text-white whitespace-nowrap">{panel.title}</h4>
+                                    <p className="text-sm text-white/80 leading-relaxed">{panel.desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </motion.div>
 
                 {/* Horizontal Line Separator */}
@@ -352,78 +256,28 @@ export default function HomeDesktop() {
                     className="pb-20"
                     style={{ marginLeft: '15%', marginRight: '15%', color: textColor }}
                 >
-                    <h3 className="text-2xl tracking-widest mb-8 font-light uppercase font-mono">
-                        BIOS
+                    <h3 className="text-2xl tracking-widest mb-4 font-light uppercase font-mono">
+                        HOW IT WORKS
                     </h3>
+                    <p className="text-sm leading-relaxed font-mono opacity-70 max-w-xl mb-12">
+                        AXIOMÉ helps people clearly see where their money stands today and what it could look like in the future.
+                    </p>
 
                     <div className="space-y-8 text-base font-mono">
-                        {/* Team Member 1 */}
                         <div>
-                            <p className="mb-2">AXIOMÉ (The System)</p>
-                            <p className="opacity-80">Helps people clearly see where their money stands today and what it could look like in the future.</p>
-                        </div>
-
-                        {/* Team Member 2 */}
-                        <div>
-                            <p className="mb-2">Present State</p>
+                            <p className="mb-2 font-bold">Present State</p>
                             <p className="opacity-80">Brings income, expenses, savings, and debts together so nothing important is hidden.</p>
                         </div>
 
-                        {/* Team Member 3 */}
                         <div>
-                            <p className="mb-2">Future Outlook</p>
+                            <p className="mb-2 font-bold">Future Outlook</p>
                             <p className="opacity-80">Shows how current habits may shape finances over time, without requiring complex planning.</p>
                         </div>
 
-                        {/* Team Member 4 */}
                         <div>
-                            <p className="mb-2">Scenarios</p>
+                            <p className="mb-2 font-bold">Scenarios</p>
                             <p className="opacity-80">Allows people to explore different choices and see possible outcomes before committing.</p>
                         </div>
-                    </div>
-                </motion.div>
-
-                {/* Explorations Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    viewport={{ once: false, amount: 0.2 }}
-                    className="pb-20"
-                    style={{ marginLeft: '15%', marginRight: '15%', color: textColor }}
-                >
-                    <h3 className="text-2xl tracking-widest mb-12 font-light uppercase font-mono">
-                        EXPLORATIONS:
-                    </h3>
-
-                    {/* Video Grid */}
-                    <div className="grid grid-cols-4 gap-8">
-                        {[
-                            { title: 'Present Snapshot', image: 'https://placehold.co/300x200/222222/666666/png?text=Snapshot' },
-                            { title: 'savings Over Time', image: 'https://placehold.co/300x200/222222/666666/png?text=Savings' },
-                            { title: 'Debt & Payoff Paths', image: 'https://placehold.co/300x200/222222/666666/png?text=Debt' },
-                            { title: 'Future Scenarios', image: 'https://placehold.co/300x200/222222/666666/png?text=Future' }
-                        ].map((video, index) => (
-                            <Link
-                                key={index}
-                                href="/dashboard"
-                                className="group block"
-                            >
-                                <div className="mb-3 overflow-hidden bg-gray-200">
-                                    <img
-                                        src={video.image}
-                                        alt={video.title}
-                                        className="w-full aspect-[3/2] object-cover transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                </div>
-                                <p className="text-xs text-center font-mono">
-                                    {video.title}
-                                </p>
-                                <p className="text-xs text-center opacity-70 mt-1 font-mono">
-                                    →
-                                </p>
-                            </Link>
-                        ))}
                     </div>
                 </motion.div>
 
@@ -453,12 +307,12 @@ export default function HomeDesktop() {
                     style={{ marginLeft: '15%', marginRight: '15%', color: textColor }}
                 >
                     <h3 className="text-xl tracking-widest mb-2 font-light uppercase text-center font-mono">
-                        SEE YOUR FUTURE — BEFORE YOU LIVE IT.
+                        SEE YOUR FUTURE, BEFORE YOU LIVE IT.
                     </h3>
 
                     {/* Cassette Image */}
                     <div className="flex justify-center">
-                        <div className="w-full max-w-5xl">
+                        <div className="w-full max-w-4xl">
                             <Image
                                 src={CassetteImage}
                                 alt="Cassette Tape"
@@ -505,15 +359,7 @@ export default function HomeDesktop() {
                         {/* Contact Information */}
                         <div className="flex gap-24 text-xs">
                             <div>
-                                <p className="mb-1">Management:</p>
-                                <p>hello@axiome.com</p>
-                            </div>
-                            <div>
-                                <p className="mb-1">Booking US:</p>
-                                <p>hello@axiome.com</p>
-                            </div>
-                            <div>
-                                <p className="mb-1">Booking EU:</p>
+                                <p className="mb-1">Support:</p>
                                 <p>hello@axiome.com</p>
                             </div>
                             <div>
