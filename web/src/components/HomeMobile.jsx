@@ -31,16 +31,16 @@ export default function HomeMobile() {
         { date: '01 / I', city: 'Present State Model', desc: 'Baseline financial reality.', target: 'net-worth' },
         { date: '02 / II', city: 'Income & Expense Structure', desc: 'Categorized inflows & outflows.', target: 'spending-tiers' },
         { date: '03 / III', city: 'Cash Flow Patterns', desc: 'Timing & liquidity analysis.', target: 'net-worth' },
-        { date: '04 / IV', city: 'savings Forecast', desc: 'Projected accumulation curves.', target: 'net-worth' },
-        { date: '05 / V', city: 'spending Behaviour Signals', desc: 'Habitual anomalies detected.', target: 'spending-tiers' },
+        { date: '04 / IV', city: 'Savings Forecast', desc: 'Projected accumulation curves.', target: 'net-worth' },
+        { date: '05 / V', city: 'Spending Behaviour Signals', desc: 'Habitual anomalies detected.', target: 'spending-tiers' },
         { date: '06 / VI', city: 'Risk Indicators', desc: 'Volatility & exposure stress-tests.', target: 'ai-advisor' },
-        { date: '07 / VII', city: 'short-Term Outlook', desc: '3-12 month liquidity horizon.', target: 'net-worth' },
+        { date: '07 / VII', city: 'Short-Term Outlook', desc: '3-12 month liquidity horizon.', target: 'net-worth' },
         { date: '08 / VIII', city: 'Long-Term Projections', desc: 'Multi-decade compound trajectories.', target: 'retirement' },
         { date: '09 / IX', city: 'Loan Payoff Path', desc: 'Debt extinction timeline.', target: 'debt' },
         { date: '10 / X', city: 'Retirement Projection', desc: 'Post-work sustainability model.', target: 'retirement' },
         { date: '11 / XI', city: 'Net Worth Trajectory', desc: 'Total asset evolution.', target: 'net-worth' },
         { date: '12 / XII', city: 'What-If Scenarios', desc: 'Alternative reality simulation.', target: 'simulator' },
-        { date: '13 / XIII', city: 'Decision Notes', desc: 'synthesized actionable intelligence.', target: 'ai-advisor' }
+        { date: '13 / XIII', city: 'Decision Notes', desc: 'Synthesized actionable intelligence.', target: 'ai-advisor' }
     ];
 
     return (
