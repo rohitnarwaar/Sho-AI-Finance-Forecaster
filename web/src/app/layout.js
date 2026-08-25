@@ -15,8 +15,8 @@ const sourceCodePro = Source_Code_Pro({
 });
 
 export const metadata = {
-  title: "AXIOMÉ — Personal Finance Intelligence",
-  description: "AXIOMÉ — AI-powered personal finance dashboard. Track expenses, forecast net worth, simulate scenarios, and get intelligent insights to master your financial future.",
+  title: "VANTAGE — Personal Finance Intelligence",
+  description: "VANTAGE — AI-powered personal finance dashboard. Track expenses, forecast net worth, simulate scenarios, and get intelligent insights to master your financial future.",
   keywords: ["finance dashboard", "expense tracker", "net worth forecast", "AI financial advisor", "budgeting"],
   icons: {
     icon: '/favicon.png',

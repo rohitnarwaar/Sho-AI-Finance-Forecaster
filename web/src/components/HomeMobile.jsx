@@ -50,7 +50,7 @@ export default function HomeMobile() {
         >
             {/* Mobile Nav */}
             <nav className="flex justify-between items-center p-6 sticky top-0 z-50 backdrop-blur-sm">
-                <span className="text-sm tracking-widest font-bold">AXIOMÉ</span>
+                <span className="text-sm tracking-widest font-bold">VANTAGE</span>
                 {currentUser ? (
                     <Link href="/dashboard" className="text-xs bg-black text-white px-4 py-2 rounded-full border border-white/20">Dashboard</Link>
                 ) : (
@@ -70,7 +70,7 @@ export default function HomeMobile() {
                     transition={{ duration: 0.8 }}
                     className="text-[4rem] leading-none font-black tracking-tighter mb-4 text-center"
                 >
-                    AXIOMÉ
+                    VANTAGE
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0 }}
@@ -104,7 +104,7 @@ export default function HomeMobile() {
                         It brings together fragmented financial signals into a coherent structure.
                     </p>
                     <p className="text-xs leading-relaxed font-mono opacity-60">
-                        Rather than recording what has already happened, AXIOMÉ focuses on exploring what could happen, and why.
+                        Rather than recording what has already happened, VANTAGE focuses on exploring what could happen, and why.
                     </p>
                 </motion.div>
             </div>
@@ -192,7 +192,7 @@ export default function HomeMobile() {
 
             {/* Footer */}
             <div className="px-6 py-12 text-[10px] opacity-40 text-center">
-                AXIOMÉ © 2026
+                VANTAGE © 2026
             </div>
         </motion.div>
     );

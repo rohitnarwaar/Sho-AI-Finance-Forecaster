@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export default function DailyScoreWidget({ userData, transactions }) {
+export default function DailyScoreWidget({ userData, transactions, dailyScore: dailyScoreProp }) {
     const [scoreData, setScoreData] = useState(null);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        // If the parent already fetched /insights/daily, reuse it instead of fetching again.
+        if (dailyScoreProp) return;
+
         const fetchDailyScore = async () => {
             try {
-                setLoading(true);
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/insights/daily`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -24,18 +25,16 @@ export default function DailyScoreWidget({ userData, transactions }) {
                 setScoreData(data);
             } catch (error) {
                 console.error('Error fetching daily score:', error);
-            } finally {
-                setLoading(false);
             }
         };
 
         if (userData && Object.keys(userData).length > 0) {
             fetchDailyScore();
         }
-    }, [userData, transactions]);
+    }, [userData, transactions, dailyScoreProp]);
 
     // Show default state if no data yet
-    const dailyScore = scoreData?.dailyScore || {
+    const dailyScore = dailyScoreProp || scoreData?.dailyScore || {
         score: 50,
         savingsRate: 0,
         emergencyMonths: 0,
@@ -43,26 +42,29 @@ export default function DailyScoreWidget({ userData, transactions }) {
         trend: 'stable'
     };
 
-    const scoreColor = dailyScore.score >= 70 ? 'text-green-400' : dailyScore.score >= 40 ? 'text-yellow-400' : 'text-red-400';
+    const scoreColor = dailyScore.score >= 70 ? 'text-green-600' : dailyScore.score >= 40 ? 'text-yellow-600' : 'text-red-600';
+    const trendLabel = dailyScore.trend === 'improving' ? 'Improving' :
+        dailyScore.trend === 'stable' ? 'Stable' : 'Needs Attention';
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-8 border border-white border-opacity-10 rounded-sm font-mono"
+            className="p-8 border border-black/10 rounded-sm font-mono"
         >
             <h3 className="text-xs tracking-widest uppercase mb-6 opacity-60 font-bold">Financial Health</h3>
 
             {/* Score Circle */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <div className={`text-6xl font-bold ${scoreColor}`}>
-                        {dailyScore.score}
+                    <div className="flex items-baseline gap-1">
+                        <span className={`text-6xl font-bold ${scoreColor}`}>
+                            {dailyScore.score}
+                        </span>
+                        <span className="text-sm opacity-30 font-bold">/100</span>
                     </div>
                     <div className="text-xs tracking-wide opacity-40 mt-2">
-                        {dailyScore.trend === 'improving' ? '📈 Improving' :
-                            dailyScore.trend === 'stable' ? '➡️ Stable' :
-                                '📉 Needs Attention'}
+                        {trendLabel}
                     </div>
                 </div>
 
@@ -76,7 +78,7 @@ export default function DailyScoreWidget({ userData, transactions }) {
             </div>
 
             {/* Insights */}
-            <div className="border-t border-white border-opacity-10 pt-6">
+            <div className="border-t border-black/10 pt-6">
                 {dailyScore.insights.slice(0, 2).map((insight, idx) => (
                     <div key={idx} className="text-xs opacity-60 mb-2">
                         • {insight}

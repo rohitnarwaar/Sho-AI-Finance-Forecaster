@@ -60,7 +60,7 @@ export default function Register() {
                     <motion.h1
                         className="text-4xl font-bold tracking-tight text-white text-center mb-12 font-mono"
                     >
-                        AXIOMÉ
+                        VANTAGE
                     </motion.h1>
                 </Link>
 
