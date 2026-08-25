@@ -2,7 +2,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import CircleImage from '@/assets/CIRCLE.png';
 import CassetteImage from '@/assets/CASST.png';
 import Image from 'next/image';
 
@@ -18,7 +17,7 @@ export default function HomeMobile() {
     const backgroundColor = useTransform(
         scrollYProgress,
         [0, 0.05, 0.7, 0.8],
-        ['rgb(220, 38, 38)', 'rgb(255, 255, 255)', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)']
+        ['rgb(185, 28, 28)', 'rgb(255, 255, 255)', 'rgb(255, 255, 255)', 'rgb(0, 0, 0)']
     );
 
     const textColor = useTransform(
@@ -28,19 +27,11 @@ export default function HomeMobile() {
     );
 
     const scenarios = [
-        { date: '01 / I', city: 'Present State Model', desc: 'Baseline financial reality.', target: 'net-worth' },
-        { date: '02 / II', city: 'Income & Expense Structure', desc: 'Categorized inflows & outflows.', target: 'spending-tiers' },
-        { date: '03 / III', city: 'Cash Flow Patterns', desc: 'Timing & liquidity analysis.', target: 'net-worth' },
-        { date: '04 / IV', city: 'Savings Forecast', desc: 'Projected accumulation curves.', target: 'net-worth' },
-        { date: '05 / V', city: 'Spending Behaviour Signals', desc: 'Habitual anomalies detected.', target: 'spending-tiers' },
-        { date: '06 / VI', city: 'Risk Indicators', desc: 'Volatility & exposure stress-tests.', target: 'ai-advisor' },
-        { date: '07 / VII', city: 'Short-Term Outlook', desc: '3-12 month liquidity horizon.', target: 'net-worth' },
-        { date: '08 / VIII', city: 'Long-Term Projections', desc: 'Multi-decade compound trajectories.', target: 'retirement' },
-        { date: '09 / IX', city: 'Loan Payoff Path', desc: 'Debt extinction timeline.', target: 'debt' },
-        { date: '10 / X', city: 'Retirement Projection', desc: 'Post-work sustainability model.', target: 'retirement' },
-        { date: '11 / XI', city: 'Net Worth Trajectory', desc: 'Total asset evolution.', target: 'net-worth' },
-        { date: '12 / XII', city: 'What-If Scenarios', desc: 'Alternative reality simulation.', target: 'simulator' },
-        { date: '13 / XIII', city: 'Decision Notes', desc: 'Synthesized actionable intelligence.', target: 'ai-advisor' }
+        { date: '01', city: 'Present State', desc: 'Income, expenses, and cash flow, all in one place.', target: 'net-worth' },
+        { date: '02', city: 'Forecasts', desc: 'Savings, retirement, and long-term projections.', target: 'retirement' },
+        { date: '03', city: 'Debt & Risk', desc: 'Loan payoff timelines and volatility signals.', target: 'debt' },
+        { date: '04', city: 'Scenarios', desc: 'What-if simulations and alternate outcomes.', target: 'simulator' },
+        { date: '05', city: 'Decision Notes', desc: 'AI-synthesized, actionable takeaways.', target: 'ai-advisor' }
     ];
 
     return (
@@ -115,23 +106,6 @@ export default function HomeMobile() {
             <div className="px-6 space-y-4 mb-32">
                 <h3 className="text-xs tracking-widest uppercase opacity-40 mb-8 text-center">MODELS & SCENARIOS</h3>
 
-                {/* Visual Lens - Moved Here */}
-                <div className="w-full aspect-square relative overflow-hidden mb-12 rounded-full">
-                    <motion.div 
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                        className="w-full h-full"
-                    >
-                        <Image
-                            src={CircleImage}
-                            alt="Lens"
-                            className="w-full h-full object-cover scale-110 opacity-90"
-                            priority
-                        />
-                    </motion.div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-transparent pointer-events-none" />
-                </div>
-
                 {scenarios.map((item, idx) => (
                     <motion.div
                         key={idx}
@@ -159,9 +133,9 @@ export default function HomeMobile() {
                 ))}
             </div>
 
-            {/* Simplified BIOS */}
+            {/* How It Works */}
             <div className="px-6 py-20 mt-20">
-                <h3 className="text-xs tracking-widest uppercase opacity-40 mb-8">SYSTEM BIOS</h3>
+                <h3 className="text-xs tracking-widest uppercase opacity-40 mb-8">HOW IT WORKS</h3>
                 <div className="space-y-12">
                     <div>
                         <p className="font-bold mb-2">Present State</p>
@@ -170,6 +144,10 @@ export default function HomeMobile() {
                     <div>
                         <p className="font-bold mb-2">Future Outlook</p>
                         <p className="text-xs opacity-60 leading-relaxed">Projects current habits forward to show long-term consequences. See the compounding effect of today&apos;s choices.</p>
+                    </div>
+                    <div>
+                        <p className="font-bold mb-2">Scenarios</p>
+                        <p className="text-xs opacity-60 leading-relaxed">Allows people to explore different choices and see possible outcomes before committing.</p>
                     </div>
                 </div>
             </div>
